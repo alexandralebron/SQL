@@ -1,0 +1,110 @@
+CREATE TABLE Employees (
+	empID CHAR(10),
+	gender CHAR(10),
+	salary INTEGER,
+	name VARCHAR(100),
+	email VARCHAR(50),
+	address VARCHAR(200),
+	startDate DATE,
+	phone VARCHAR(10),
+	PRIMARY KEY (empID)
+);
+
+CREATE TABLE Departments (
+	dno INTEGER,
+	dName CHAR(10),
+	budget BIGINT,
+	NumberOfEmployees CHAR(10),
+	PRIMARY KEY (dno)
+);
+
+CREATE TABLE Works_In (
+	empID CHAR(10),
+	dno INTEGER,
+	PRIMARY KEY (empID, dno),
+	FOREIGN KEY (empID)
+		REFERENCES Employees(empID),
+	FOREIGN KEY (dno)
+		REFERENCES Departments(dno)
+);
+
+CREATE TABLE Manages (
+	empID CHAR(10),
+	dno INTEGER,
+	PRIMARY KEY (dno),
+	FOREIGN KEY (empID)
+		REFERENCES Employees(empID),
+	FOREIGN KEY (dno)
+		REFERENCES Departments(dno)
+);
+
+CREATE TABLE Dependents (
+	empID CHAR(10),
+	name CHAR(20),
+	dob INTEGER,
+	age INTEGER,
+	gender CHAR(10),
+	PRIMARY KEY (empID, name),
+	FOREIGN KEY (empID)
+		REFERENCES Employees(empID)
+);
+
+INSERT INTO Employees (empID, gender, salary, name, email, address, startDate, phone)
+VALUES
+	('E001', 'Male', 50000, 'John Doe', 'johndoe@example.com', '123 Main St', '2021-01-01', '555-555-5555'),
+	('E002', 'Female', 55000, 'Jane Doe', 'janedoe@example.com', '456 Elm St', '2021-02-01', '555-555-5556'),
+	('E003', 'Male', 60000, 'Bob Smith', 'bobsmith@example.com', '789 Oak St', '2021-03-01', '555-555-5557');
+
+INSERT INTO Departments (dno, dName, budget, NumberOfEmployees)
+VALUES
+	(1, 'Sales', 100000, '5'),
+	(2, 'Marketing', 200000, '7'),
+	(3, 'Engineering', 150000, '10');
+
+INSERT INTO Works_In (empID, dno)
+VALUES
+	('E001', 1),
+	('E002', 2),
+	('E003', 3);
+
+INSERT INTO Manages (empID, dno)
+VALUES
+	('E001', 1),
+	('E002', 2);
+
+INSERT INTO Dependents (empID, name, dob, age, gender)
+VALUES
+	('E001', 'Jimmy Doe', '2010-01-01', 11, 'Male'),
+	('E002', 'Sophie Doe', '2011-02-01', 10, 'Female'),
+	('E003', 'Emily Smith', '2012-03-01', 9, 'Female');
+
+SELECT Employees.name AS EmployeeName, Departments.dName AS DepartmentName
+FROM Employees
+JOIN Manages
+ON Employees.empID = Manages.empID
+JOIN Departments
+ON Manages.dno = Departments.dno;
+
+CREATE VIEW FloralOrders AS
+SELECT 
+  Employees.empID AS EmployeeID,
+  Employees.name AS EmployeeName,
+  Employees.email AS Email,
+  Employees.address AS Address,
+  Employees.gender AS Gender,
+  Departments.dName AS DepartmentName,
+  Manager.name AS ManagerName,
+  Dependents.name AS ChildName,
+  Dependents.age AS ChildAge
+FROM Employees
+JOIN Works_In
+ON Employees.empID = Works_In.empID
+JOIN Departments
+ON Works_In.dno = Departments.dno
+JOIN Manages
+ON Manages.dno = Departments.dno
+JOIN Employees AS Manager
+ON Manages.empID = Manager.empID
+JOIN Dependents
+ON Dependents.empID = Employees.empID
+WHERE Employees.gender = 'Female';
